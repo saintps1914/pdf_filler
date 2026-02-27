@@ -116,8 +116,6 @@ def create_client(request):
                 path_to_save_dir.mkdir(exist_ok=True, parents=True)
 
                 font_size = 8
-                if template == "PeterBrakner.pdf":
-                    font_size = 6
 
                 fill_pdf_by_coordinates(
                     path_to_template,

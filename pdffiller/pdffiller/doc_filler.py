@@ -42,7 +42,6 @@ name_pdf_template_map = {
     "darla": "Darla.pdf",
     "cefi": "Cefi.pdf",
     "huntington": "Huntington.pdf",
-    "peter_brakner": "PeterBrakner.pdf",
     "blue_bridge": "BlueBridge.pdf",
     "quality_equipment": "QualityEquipment.pdf",
     "george_finance": "GeorgeFinance.pdf",
