@@ -2,3 +2,4 @@ django==5.1.7
 pymupdf==1.25.3
 faker==37.0.0
 python-dateutil==2.9.0.post0
+gunicorn==21.2.0
