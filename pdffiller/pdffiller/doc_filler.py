@@ -49,6 +49,7 @@ name_pdf_template_map = {
     "gandr": "GandR.pdf",
     "fast_lane": "Fast Lane Leasing Credit Application.pdf",
     "tk_pmb": "Credit Application_TK-PMB.pdf",
+    "smfl": "SMFL Credit Application.pdf",
 }
 
 coordinates = {
@@ -125,8 +126,8 @@ coordinates = {
             "title": (307, 223),
             "years_in_business": (430, 190),
             # Footer
-            "applicant_1_name": (110, 425),
-            "applicant_1_date": (650, 425),
+            "applicant_1_name": (90, 470),
+            "applicant_1_date": (640, 470),
         }
     },
     "keystone": {
@@ -490,7 +491,10 @@ form_field_map = {
         "Email": "email",
         "Federal ID": "ein",
         "Name 1": "name",
+        "PG Title 1": "title",
+        "Title 1": "title",
         "DOB 1": "dob",
+        "Own 1": "ownership",
         "SSN 1": "ssn",
         "Phone 1": "phone",
         "Cell 1": "phone",
@@ -502,6 +506,7 @@ form_field_map = {
     },
     "tk_pmb": {
         "BUSINESS NAME": "company_name",
+        "Year Started": "year_started",
         "Office": "phone",
         "Contact": "name",
         "Email": "email",
@@ -517,6 +522,7 @@ form_field_map = {
         "City_2": "city",
         "State_2": "state",
         "ZIP_2": "zip_code",
+        "Ownership": "ownership",
         "Business Owner": "name",
         "Date": "applicant_1_date",
     },
@@ -524,6 +530,33 @@ form_field_map = {
 
 coordinates["fast_lane"] = {"__widgets__": form_field_map["fast_lane"]}
 coordinates["tk_pmb"] = {"__widgets__": form_field_map["tk_pmb"]}
+coordinates["fast_lane"][0] = {"signature_1": (85, 708)}
+
+coordinates["smfl"] = {
+    0: {
+        "company_name": (30, 120),
+        "company_address": (30, 140),
+        "company_city": (255, 140),
+        "company_state": (370, 140),
+        "company_zip": (430, 140),
+        "ein": (505, 140),
+        "business_phone": (30, 160),
+        "business_email": (350, 160),
+        "years_in_business": (200, 185),
+        "company_state_year": (410, 205),
+        "name": (30, 235),
+        "title": (180, 235),
+        "ownership": (245, 235),
+        "ssn": (340, 235),
+        "dob": (505, 235),
+        "owner_phone": (30, 255),
+        "owner_email": (360, 255),
+        "address": (30, 275),
+        "city": (250, 275),
+        "state": (400, 275),
+        "zip_code": (500, 275),
+    }
+}
 
 
 def convert_date(date: str, format: str) -> str:
@@ -566,6 +599,18 @@ def normalize_data(data: Dict) -> Dict:
         )
     if "ownership" not in data:
         data["ownership"] = "100"
+    if "title" not in data:
+        data["title"] = "owner"
+    if "signature_1" not in data:
+        data["signature_1"] = data.get("name", "")
+    if "business_phone" not in data:
+        data["business_phone"] = data.get("phone", "")
+    if "business_email" not in data:
+        data["business_email"] = data.get("email", "")
+    if "owner_phone" not in data:
+        data["owner_phone"] = data.get("phone", "")
+    if "owner_email" not in data:
+        data["owner_email"] = data.get("email", "")
     if "year_started" not in data:
         try:
             parsed_date = parser.parse(data.get("date_of_incorporation", ""))
@@ -575,15 +620,11 @@ def normalize_data(data: Dict) -> Dict:
 
     return data
 
-def fill_pdf_form_fields(
-    template_path: Path,
-    save_file_path: Path,
+def apply_pdf_form_fields(
+    pdf_document: fitz.Document,
     data: Dict,
     field_map: Dict[str, str],
 ) -> None:
-    pdf_document = fitz.open(template_path)
-    data = normalize_data(data)
-
     for page_num in range(len(pdf_document)):
         page = pdf_document[page_num]
         for widget in page.widgets() or []:
@@ -597,8 +638,6 @@ def fill_pdf_form_fields(
             widget.field_value = str(value)
             widget.update()
 
-    pdf_document.save(save_file_path)
-
 def fill_pdf_by_coordinates(
     template_path: Path,
     save_file_path: Path,
@@ -609,12 +648,12 @@ def fill_pdf_by_coordinates(
     if coordinates is None:
         raise ValueError("Coordinates are required for non-form PDFs.")
 
-    if "__widgets__" in coordinates:
-        field_map = coordinates["__widgets__"]
-        return fill_pdf_form_fields(template_path, save_file_path, data, field_map)
-
     pdf_document = fitz.open(template_path)
     data = normalize_data(data)
+
+    if "__widgets__" in coordinates:
+        field_map = coordinates["__widgets__"]
+        apply_pdf_form_fields(pdf_document, data, field_map)
 
     for page_num in range(len(pdf_document)):
         page = pdf_document[page_num]
