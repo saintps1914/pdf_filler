@@ -8,7 +8,7 @@ import logging
 from django.shortcuts import render
 from django.utils import timezone
 from django.conf import settings
-from django.contrib.auth.views import login_required
+from django.contrib.auth.decorators import login_required
 from django.http import FileResponse, Http404
 
 from .forms import NewClientForm

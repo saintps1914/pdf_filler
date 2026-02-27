@@ -496,18 +496,18 @@ def fill_pdf_by_coordinates(
     data["dob"] = parsed_dob
 
     if "name" not in data:
-        data["name"] = f"{data.get("first_name", "")} {data.get("last_name", "")}"
+        data["name"] = f"{data.get('first_name', '')} {data.get('last_name', '')}"
     if "company_city_state_zip" not in data:
         data["company_city_state_zip"] = (
-            f"{data.get("company_city", "-")} / {data.get("company_state", "-")} / {data.get("company_zip", "-")}"
+            f"{data.get('company_city', '-')} / {data.get('company_state', '-')} / {data.get('company_zip', '-')}"
         )
     if "person_address" not in data:
         data["person_address"] = (
-            f"{data.get("address", "-")} / {data.get("city", "-")} / {data.get("state", "-")} / {data.get("zip_code", "-")}"
+            f"{data.get('address', '-')} / {data.get('city', '-')} / {data.get('state', '-')} / {data.get('zip_code', '-')}"
         )
     if "person_city_state_zip" not in data:
         data["person_city_state_zip"] = (
-            f"{data.get("city", "-")} / {data.get("state", "-")} / {data.get("zip_code", "-")}"
+            f"{data.get('city', '-')} / {data.get('state', '-')} / {data.get('zip_code', '-')}"
         )
     if "applicant_1_name" not in data:
         data["applicant_1_name"] = data.get("name", "")
@@ -522,7 +522,7 @@ def fill_pdf_by_coordinates(
         data["years_in_business"] = str(years)
     if "company_state_year" not in data:
         data["company_state_year"] = (
-            f"{data.get("company_state", "-")} / {data.get("date_of_incorporation", "-")}"
+            f"{data.get('company_state', '-')} / {data.get('date_of_incorporation', '-')}"
         )
     if "ownership" not in data:
         data["ownership"] = "100"
