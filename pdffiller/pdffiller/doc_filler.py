@@ -47,6 +47,8 @@ name_pdf_template_map = {
     "quality_equipment": "QualityEquipment.pdf",
     "george_finance": "GeorgeFinance.pdf",
     "gandr": "GandR.pdf",
+    "fast_lane": "Fast Lane Leasing Credit Application.pdf",
+    "tk_pmb": "Credit Application_TK-PMB.pdf",
 }
 
 coordinates = {
@@ -477,26 +479,69 @@ coordinates = {
     },
 }
 
+form_field_map = {
+    "fast_lane": {
+        "Business Name": "company_name",
+        "Business Address": "company_address",
+        "Bus City": "company_city",
+        "Bus State": "company_state",
+        "Bus Zip": "company_zip",
+        "Bus Telephone": "phone",
+        "Email": "email",
+        "Federal ID": "ein",
+        "Bus Years": "years_in_business",
+        "Name 1": "name",
+        "DOB 1": "dob",
+        "Own 1": "ownership",
+        "SSN 1": "ssn",
+        "Phone 1": "phone",
+        "Cell 1": "phone",
+        "Address 1": "address",
+        "City 1": "city",
+        "State 1": "state",
+        "Zip 1": "zip_code",
+        "Date 1": "applicant_1_date",
+    },
+    "tk_pmb": {
+        "BUSINESS NAME": "company_name",
+        "Year Started": "year_started",
+        "Office": "phone",
+        "Contact": "name",
+        "Email": "email",
+        "Mailing Address": "company_address",
+        "City": "company_city",
+        "State": "company_state",
+        "ZIP": "company_zip",
+        "Tax ID": "ein",
+        "BUSINESS OWNER 1": "name",
+        "Soc Sec": "ssn",
+        "Date Of Birth": "dob",
+        "Address": "address",
+        "City_2": "city",
+        "State_2": "state",
+        "ZIP_2": "zip_code",
+        "Years Exp": "years_in_business",
+        "Ownership": "ownership",
+        "Business Owner": "name",
+        "Date": "applicant_1_date",
+    },
+}
+
+coordinates["fast_lane"] = {"__widgets__": form_field_map["fast_lane"]}
+coordinates["tk_pmb"] = {"__widgets__": form_field_map["tk_pmb"]}
+
 
 def convert_date(date: str, format: str) -> str:
     parsed_date = parser.parse(date)
     return parsed_date.strftime(format)
 
-
-def fill_pdf_by_coordinates(
-    template_path: Path,
-    save_file_path: Path,
-    data: Dict,
-    coordinates: Dict,
-    font_size: int = 12,
-) -> None:
-    pdf_document = fitz.open(template_path)
-
+def normalize_data(data: Dict) -> Dict:
+    data = dict(data)
     parsed_dob = convert_date(data.get("dob", ""), "%m-%d-%Y")
     data["dob"] = parsed_dob
 
     if "name" not in data:
-        data["name"] = f"{data.get('first_name', '')} {data.get('last_name', '')}"
+        data["name"] = f"{data.get('first_name', '')} {data.get('last_name', '')}".strip()
     if "company_city_state_zip" not in data:
         data["company_city_state_zip"] = (
             f"{data.get('company_city', '-')} / {data.get('company_state', '-')} / {data.get('company_zip', '-')}"
@@ -526,6 +571,55 @@ def fill_pdf_by_coordinates(
         )
     if "ownership" not in data:
         data["ownership"] = "100"
+    if "year_started" not in data:
+        try:
+            parsed_date = parser.parse(data.get("date_of_incorporation", ""))
+            data["year_started"] = parsed_date.strftime("%Y")
+        except Exception:
+            data["year_started"] = ""
+
+    return data
+
+def fill_pdf_form_fields(
+    template_path: Path,
+    save_file_path: Path,
+    data: Dict,
+    field_map: Dict[str, str],
+) -> None:
+    pdf_document = fitz.open(template_path)
+    data = normalize_data(data)
+
+    for page_num in range(len(pdf_document)):
+        page = pdf_document[page_num]
+        for widget in page.widgets() or []:
+            field_name = widget.field_name
+            data_key = field_map.get(field_name)
+            if not data_key:
+                continue
+            value = data.get(data_key, "")
+            if value is None:
+                value = ""
+            widget.field_value = str(value)
+            widget.update()
+
+    pdf_document.save(save_file_path)
+
+def fill_pdf_by_coordinates(
+    template_path: Path,
+    save_file_path: Path,
+    data: Dict,
+    coordinates: Dict,
+    font_size: int = 12,
+) -> None:
+    if coordinates is None:
+        raise ValueError("Coordinates are required for non-form PDFs.")
+
+    if "__widgets__" in coordinates:
+        field_map = coordinates["__widgets__"]
+        return fill_pdf_form_fields(template_path, save_file_path, data, field_map)
+
+    pdf_document = fitz.open(template_path)
+    data = normalize_data(data)
 
     for page_num in range(len(pdf_document)):
         page = pdf_document[page_num]
