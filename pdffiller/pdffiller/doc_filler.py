@@ -201,20 +201,19 @@ coordinates = {
         0: {  # Company Information
             "company_name": (130, 100),
             "company_address": (90, 120),
-            "company_city_state_zip": (360, 120),
+            "company_city_state_zip": (370, 120),
             "ein": (490, 175),
             "name": [(145, 260), (100, 155)],
-            "phone": [(110, 175), (480, 277)],
+            "phone": [(110, 175), (480, 277), (355, 295)],
             "email": (360, 155),
             "date_of_incorporation": (130, 140),
             # Owner Information
             "ssn": (485, 260),
             "person_address": (100, 277),
-            "dob": (365, 295),
-            "ownership": (345, 260),
+            "ownership": (350, 260),
             # Signatures
-            "applicant_1_name": (360, 730),
-            "applicant_1_date": (500, 735),
+            "applicant_1_name": (345, 704),
+            "applicant_1_date": (525, 704),
         }
     },
     "mitsu": {
